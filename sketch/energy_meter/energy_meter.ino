@@ -11,9 +11,9 @@
  *
  *
  * Connect
- * @todo Potoresistor D2 - Interrupt 1 on UNO ???
- * 433,92mhz sender - AVR Pin 5 (PB0 - DDRB 0)
- * Power to sender - AVR Pin 2,3 (PB3, PB4)
+ * PB2 (int0)   Potoresistor     (AVR Pin 7)
+ * PB0          433,92mhz sender (AVR Pin 5)
+ * PB3 and PB4  Power to sender  (AVR Pin 2&3)
  *
  * Requires
  * - TellstickSensor library (http://forum.arduino.cc/index.php?topic=211371.0)
