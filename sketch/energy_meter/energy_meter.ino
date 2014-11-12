@@ -41,13 +41,10 @@ TellstickSensor Sensor1(0);
 int power1 = 3;
 int power2 = 4;
 
-// Indicator led PB 5
+// Indicator led PB1
 int led = 1;
 
-int count = 0; // kwh count
-//int subCount; // kwh sub count
-
-int light; // interrupt flag
+int count = 0; // count
 
 void setup()
 {
@@ -81,16 +78,16 @@ void loop()
   goToSleep();
 
   count++;
-  if ( count >= 100 )
+  if ( count >= 10 ) // debug
   {
     count = 0;
-    sendCommand(77);
-    delay(900);
+    sendCommand(1);
+    delay(100);
   }
   else
   {
     digitalWrite( led, HIGH ); // led
-    delay(1200);
+    delay(400);
     digitalWrite( led, LOW ); // led
   }
 
