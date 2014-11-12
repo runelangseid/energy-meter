@@ -20,8 +20,10 @@
  * - Board setup for the ARduino IDE - https://github.com/damellis/attiny
  *
  * Notes
+ * - Sleep-mode reference https://gist.github.com/JChristensen/5616922
  *
  * Bugs
+ * - Interrupt pin must not be low then AVR goes to sleep (!!!)
  *
  */
 
@@ -39,10 +41,13 @@ TellstickSensor Sensor1(0);
 int power1 = 3;
 int power2 = 4;
 
-int count; // kwh count
-int subCount; // kwh sub count
+// Indicator led PB 5
+int led = 1;
 
-volatile int light; // interrupt flag
+int count = 0; // kwh count
+//int subCount; // kwh sub count
+
+int light; // interrupt flag
 
 void setup()
 {
@@ -50,21 +55,13 @@ void setup()
   pinMode(power1, OUTPUT);
   pinMode(power2, OUTPUT);
 
+  // led
+  pinMode(led, OUTPUT);
+
   // Set sensor device id
   Sensor1.SetDeviceID(202);
 
-  //Serial.begin(9600);
-  //Serial.println("START");
-
-  count = EEPROM.read(0);
-  subCount = EEPROM.read(1);
-  subCount = 0;
-
-  // Setup interrupt routine
-  //attachInterrupt(0, handleInterrupt, CHANGE);
-//  attachInterrupt(0, handleInterrupt, FALLING);
-
-
+  delay(1000);
 }
 
 void loop()
@@ -83,36 +80,34 @@ void loop()
   
   goToSleep();
 
-  // Interrupt triggered
-  //if (light == 1)
+  count++;
+  if ( count >= 100 )
   {
-    subCount++;
-    if ( subCount >= 1000 )
-    {
-      subCount = 0;
-      count++;
-
-      EEPROM.write(0, count);
-      EEPROM.write(1, subCount);
-    }
-
-    powerSender(HIGH);
-    delay(100);
-    Sensor1.SetHumidity((uint8_t)55);
-    Sensor1.SetTemperature((int16_t)(subCount*10));
-    Sensor1.Transmitt();
-    delay(10);
-    powerSender(LOW);
-
-    //Serial.print("Light - ");
-    //Serial.print("Count ");
-    //Serial.print(count);
-    //Serial.print(" - Subcount ");
-    //Serial.println(subCount);
-    light = 0;
-    delay(500);
-    //sei();
+    count = 0;
+    sendCommand(77);
+    delay(900);
   }
+  else
+  {
+    digitalWrite( led, HIGH ); // led
+    delay(1200);
+    digitalWrite( led, LOW ); // led
+  }
+
+}
+
+/* Transmitt RF data
+ * @param int Value to transmitt
+ */
+void sendCommand(int value)
+{
+  powerSender(HIGH);
+  delay(100);
+  Sensor1.SetHumidity((uint8_t)value);
+  Sensor1.SetTemperature((int16_t)(40*10));
+  Sensor1.Transmitt();
+  delay(10);
+  powerSender(LOW);
 }
 
 void goToSleep(void)
@@ -148,3 +143,4 @@ void powerSender(int flag)
   digitalWrite(power1, flag);
   digitalWrite(power2, flag);
 }
+
