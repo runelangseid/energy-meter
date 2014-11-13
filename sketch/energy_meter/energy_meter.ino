@@ -1,7 +1,5 @@
 
 /** Arduino energy meter
- * For ATTINY8
- *
  * ATMEL ATTINY85 / ARDUINO
  *                         +-\/-+
  *                    PB5  1|    |8  VCC
@@ -11,8 +9,9 @@
  *
  *
  * Connect
- * PB2 (int0)   Potoresistor     (AVR Pin 7)
  * PB0          433,92mhz sender (AVR Pin 5)
+ * PB1          Indicator led    (AVR Pin 6)
+ * PB2 (int0)   Potoresistor     (AVR Pin 7)
  * PB3 and PB4  Power to sender  (AVR Pin 2&3)
  *
  * Requires
@@ -23,7 +22,7 @@
  * - Sleep-mode reference https://gist.github.com/JChristensen/5616922
  *
  * Bugs
- * - Interrupt pin must not be low then AVR goes to sleep (!!!)
+ * - Interrupt pin must not be low when AVR goes to sleep (!!!)
  *
  */
 
@@ -107,6 +106,8 @@ void sendCommand(int value)
   powerSender(LOW);
 }
 
+/* AVR Sleep function
+ */
 void goToSleep(void)
 {
     byte adcsra, mcucr1, mcucr2;
@@ -128,12 +129,14 @@ void goToSleep(void)
     ADCSRA = adcsra;                          //restore ADCSRA
 }
 
+/* ISR
+ */
 ISR(INT0_vect)
 {
   GIMSK = 0; // disable external interrupts - and wake up
 }
 
-/* Enables the output pins of the AVR that power the RF sender
+/* Enables the output pins of the AVR that powers the RF sender
  */
 void powerSender(int flag)
 {
